@@ -9,11 +9,7 @@ crypt_server <- function(host_address = "localhost")
 
 #Loading Data
 
-		local
-			({
-				load("Data/user_data")
-				ls()
-			})
+		local({load("Data/user_data");ls()})
 
 #Server
 
