@@ -14,7 +14,7 @@ crypt_server <- function(host_address = "localhost")
 				data <- readLines(con, 1)
 				print(data)
 				user_info_frame <- server_user_data_parser(data)
-				response <- vrfy_usr(user_info_frame)
+				response <- toString(vrfy_usr(user_info_frame))
 				writeLines(response, con) 
 				close(con)
 			}
