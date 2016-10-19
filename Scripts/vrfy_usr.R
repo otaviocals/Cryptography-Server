@@ -5,7 +5,7 @@ vrfy_usr <- function(input_data,database=user_data)
 		usr_found <- FALSE
 
 
-		if(exists("user_data") && nrow(database)>0)
+		if(nrow(database)>0)
 		{
 			for(i in 1:nrow(database))
 			{
