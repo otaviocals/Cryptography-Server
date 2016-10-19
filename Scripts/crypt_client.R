@@ -1,17 +1,55 @@
 crypt_client <- function(host_address = "localhost")
 	{
-		while(TRUE)
+
+#Loading Scripts
+
+		source("Scripts/pkgTest.R")
+		source("Scripts/submit_usr.R")
+
+#Loading Packages
+
+		packages_to_load <- c("sodium")
+
+		for(i in 1:length(packages_to_load))
+		{
+			pkg_loaded <- suppressWarnings(pkgTest(packages_to_load[i]))
+			if(!pkg_loaded)
+			{
+				print("Could not install a necessary R package. Please verify your internet connection.")
+				pkgs <- FALSE
+				break
+			}
+			else
+			{
+				pkgs <- TRUE
+			}
+		}
+
+#Connecting to Server
+
+		while(pkgs)
 			{
 				con <- socketConnection(host=host_address, port = 32323, blocking=TRUE,server=FALSE, open="r+")
 				f <- file("stdin")
 				open(f)
-				print("Enter text to be upper-cased, q to quit")
-				sendme <- readLines(f, n=1)
-				if(tolower(sendme)=="q")
+
+
+				print("Authentication, press q to quit")
+				print("Username:")
+				user <- readLines(f, n=1)
+				if(tolower(user)=="q")
 					{
 						break
 					}
-				write_resp <- writeLines(sendme, con)
+				print("Password:")
+				pass <- readLines(f, n=1)
+				if(tolower(pass)=="q")
+					{
+						break
+					}
+
+				user_info <- submit_usr(user,pass)
+				write_resp <- writeLines(user_info, con)
 				server_resp <- readLines(con, 1)
 				print(paste("Your upper cased text:  ", server_resp))
 				close(con)
