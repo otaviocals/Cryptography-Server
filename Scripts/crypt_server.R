@@ -9,7 +9,7 @@ crypt_server <- function(host_address = "localhost")
 
 #Loading Data
 
-		load("Data/user_data")
+		user_data <- read.csv("Data/user_data.csv")
 
 #Server
 
