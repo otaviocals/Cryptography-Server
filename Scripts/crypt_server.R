@@ -9,7 +9,7 @@ crypt_server <- function(host_address = "localhost")
 
 #Loading Data
 
-		local({load("Data/user_data");ls()})
+		load("Data/user_data")
 
 #Server
 
@@ -19,7 +19,7 @@ crypt_server <- function(host_address = "localhost")
 				con <- socketConnection(host=host_address, port = 32323, blocking=TRUE,server=TRUE, open="r+")
 				data <- readLines(con, 1)
 				user_info_frame <- server_user_data_parser(data)
-				response <- toString(vrfy_usr(user_info_frame))
+				response <- toString(vrfy_usr(user_info_frame,user_data))
 				writeLines(response, con) 
 				close(con)
 			}
