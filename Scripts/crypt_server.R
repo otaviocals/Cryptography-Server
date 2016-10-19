@@ -7,6 +7,12 @@ crypt_server <- function(host_address = "localhost")
 		source("Scripts/server_user_data_parser.R")
 		source("Scripts/vrfy_usr.R")
 
+#Loading Data
+
+		load("Data/user_data")
+
+#Server
+
 		while(TRUE)
 			{
 				writeLines("Listening...")

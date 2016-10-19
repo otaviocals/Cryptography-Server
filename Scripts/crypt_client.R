@@ -34,14 +34,14 @@ crypt_client <- function(host_address = "localhost")
 				open(f)
 
 
-				print("Authentication, press q to quit")
-				print("Username:")
+				cat("\nAuthentication, press q to quit\n")
+				cat("\nUsername:\n")
 				user <- readLines(f, n=1)
 				if(tolower(user)=="q")
 				{
 					break
 				}
-				print("Password:")
+				cat("\nPassword:\n")
 				pass <- readLines(f, n=1)
 				if(tolower(pass)=="q")
 				{
@@ -55,15 +55,16 @@ crypt_client <- function(host_address = "localhost")
 				server_resp <- readLines(con, 1)
 				if(server_resp == "0")
 				{
-					print("Authenticated!")
+					cat("\nAuthenticated!\n\n")
+					break
 				}
 				else if(server_resp == "1")
 				{
-					print("User or Password is wrong.")
+					cat("\nUser or Password is wrong.\n\n")
 				}
 				else
 				{
-					print("Server Error")
+					cat("\nServer Error\n\n")
 				}
 
 
