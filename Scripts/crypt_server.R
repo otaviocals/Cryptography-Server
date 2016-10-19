@@ -5,6 +5,7 @@ crypt_server <- function(host_address = "localhost")
 
 		source("Scripts/pkgTest.R")
 		source("Scripts/server_user_data_parser.R")
+		source("Scripts/vrfy_usr.R")
 
 		while(TRUE)
 			{
@@ -13,8 +14,7 @@ crypt_server <- function(host_address = "localhost")
 				data <- readLines(con, 1)
 				print(data)
 				user_info_frame <- server_user_data_parser(data)
-				print(user_info_frame)
-				response <- toupper(data) 
+				response <- vrfy_usr(user_info_frame)
 				writeLines(response, con) 
 				close(con)
 			}
