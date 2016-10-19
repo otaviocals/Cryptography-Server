@@ -52,7 +52,7 @@ vrfy_usr <- function(input_data,database=user_data)
 		else
 		{
 			print("No Database")
-			result <- 2
+			result <- 1000
 		}
 
 	result

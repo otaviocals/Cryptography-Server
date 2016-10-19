@@ -38,20 +38,35 @@ crypt_client <- function(host_address = "localhost")
 				print("Username:")
 				user <- readLines(f, n=1)
 				if(tolower(user)=="q")
-					{
-						break
-					}
+				{
+					break
+				}
 				print("Password:")
 				pass <- readLines(f, n=1)
 				if(tolower(pass)=="q")
-					{
-						break
-					}
+				{
+					break
+				}
 
 				user_info <- submit_usr(user,pass)
 				write_resp <- writeLines(user_info, con)
+
+
 				server_resp <- readLines(con, 1)
-				print(paste("Your upper cased text:  ", server_resp))
+				if(server_resp == "0")
+				{
+					print("Authenticated!")
+				}
+				else if(server_resp == "1")
+				{
+					print("User or Password is wrong.")
+				}
+				else
+				{
+					print("Server Error")
+				}
+
+
 				close(con)
 			}
 	}
