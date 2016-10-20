@@ -27,6 +27,8 @@ crypt_client <- function(host_address = "localhost")
 
 #Connecting to Server
 
+		stop_con <- FALSE
+
 		while(pkgs)
 			{
 				con <- socketConnection(host=host_address, port = 32323, blocking=TRUE,server=FALSE, open="r+")
@@ -39,12 +41,16 @@ crypt_client <- function(host_address = "localhost")
 				user <- readLines(f, n=1)
 				if(tolower(user)=="q")
 				{
+					cat("\nExiting Server.\n\n")
+					close(con)
 					break
 				}
 				cat("\nPassword:\n")
 				pass <- readLines(f, n=1)
 				if(tolower(pass)=="q")
 				{
+					cat("\nExiting Server.\n\n")
+					close(con)
 					break
 				}
 
@@ -53,20 +59,73 @@ crypt_client <- function(host_address = "localhost")
 
 
 				server_resp <- readLines(con, 1)
+#Auth Successful
 				if(server_resp == "0")
 				{
 					cat("\nAuthenticated!\n\n")
-					break
+					
+					while(TRUE)
+					{
+						cat("\nChoose an action:\n 1 - List Data          2 - Read Data          3 - Write Data\n 4 - Delete Data        5 - Account Summary    6 - Logout\n")
+						action <- readLines(f, n=1)
+						write_action <- writeLines(action, con)
+#Listing Data
+						if(action=="1")
+						{
+							cat("\nCurrent Data:\n")
+						}
+#Reading Data
+						else if(action=="2")
+						{
+							cat("\nReading Data...\n")
+						}
+#Writing Data
+						else if(action=="3")
+						{
+							cat("\nData Written.\n")
+						}
+#Deleting Data
+						else if(action=="4")
+						{
+							cat("\nData Deleted.\n")
+						}
+#Account Summary
+						else if(action=="5")
+						{
+							cat("\nAccount Summary:\n")
+						}
+#Logout
+						else if(action=="6")
+						{
+							break
+						}
+#Invalid Action
+						else
+						{
+							cat("\nInvalid Action.\n")
+						}
+					}
 				}
+#Failure to Auth
 				else if(server_resp == "1")
 				{
 					cat("\nUser or Password is wrong.\n\n")
+					close(con)
+					break
 				}
+#Server Error
 				else
 				{
 					cat("\nServer Error\n\n")
+					close(con)
+					break
 				}
 
+				if(stop_con)
+				{
+					close(con)
+					break
+				}
 
 				close(con)
 			}
