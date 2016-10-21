@@ -5,6 +5,8 @@ crypt_client <- function(host_address = "localhost")
 
 		source("Scripts/pkgTest.R")
 		source("Scripts/submit_usr.R")
+		source("Scripts/receive_r_object.R")
+		source("Scripts/send_r_object.R")
 
 #Loading Packages
 

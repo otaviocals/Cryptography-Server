@@ -6,6 +6,8 @@ crypt_server <- function(host_address = "localhost")
 		source("Scripts/pkgTest.R")
 		source("Scripts/server_user_data_parser.R")
 		source("Scripts/vrfy_usr.R")
+		source("Scripts/receive_r_object.R")
+		source("Scripts/send_r_object.R")
 
 #Loading Data
 
