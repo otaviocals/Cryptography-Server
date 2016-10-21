@@ -73,16 +73,36 @@ crypt_client <- function(host_address = "localhost")
 						if(action=="1")
 						{
 							cat("\nCurrent Data:\n")
+							envir_data_list <- readLines(con, 1)
+							cat("\n",envir_data_list,"\n")
+							rm(envir_data_list)
 						}
 #Reading Data
 						else if(action=="2")
 						{
-							cat("\nReading Data...\n")
+							cat("\nEnter Object Name.\n")
+							file_to_read <- readLines(f, n=1)
+							write_read_file <- writeLines(file_to_read,con)
+							read_data <- readLines(con,1)
+							cat("\nData Object:\n\n",read_data,"\n")
+							rm(read_data)
+							rm(file_to_read)
 						}
 #Writing Data
 						else if(action=="3")
 						{
-							cat("\nData Written.\n")
+							cat("\nEnter Object Name.\n")
+							file_to_write <- readLines(f, n=1)
+							file_to_write_object <- get0(file_to_write)
+							if(is.null(file_to_write_object))
+							{
+								cat("\nObject not found.\n")
+							}
+							else
+							{
+								write_read_file <- writeLines(file_to_write_object,con)
+							}
+
 						}
 #Deleting Data
 						else if(action=="4")
