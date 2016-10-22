@@ -1,6 +1,9 @@
 crypt_server <- function(host_address = "localhost")
 	{
 
+		user_data_limit <- 104857600
+
+
 #Loading Scripts
 
 		source("Scripts/pkgTest.R")
@@ -79,24 +82,39 @@ crypt_server <- function(host_address = "localhost")
 							}
 							if(is.null(read_file))
 							{
-								read_response <- "Object not found."
+								writeLines("0",con)
 							}
 							else
 							{
-								read_response <- toString(print(read_file))
+								writeLines("1",con)
+								text_data_to_send <- send_r_object(read_file)
+								data_length <- length(text_data_to_send)
+								data_length_string <- toString(data_length)
+								data_length_send <- writeLines(data_length_string,con)
+								for(i in 1:data_length)
+								{
+									current_line <- writeLines(text_data_to_send[i],con)
+								}
 							}
-							writeLines(read_response,con)
-							rm(read_response)
+
 							rm(read_file)
 						}
 #Writing Data
 						else if(action=="3")
 						{
+							envir_size <- object.size(get0(ls(envir=user_envir),envir=user_envir))
+
 							writeLines("Writing Data...")
+							file_to_write_size <- readLines(con, 1)
 							file_to_write <- readLines(con, 1)
+							total_size <- envir_size+strtoi(file_to_write_size)
 							writeLines(file_to_write)
-							if(nchar(file_to_write)>0)
+
+							if(nchar(file_to_write)>0 && total_size < user_data_limit)
 							{
+
+								exceed <- writeLines("1",con)
+
 								if(exists(file_to_write,envir=user_envir))
 								{
 									file_exists_server <- writeLines("1",con)
@@ -120,7 +138,7 @@ crypt_server <- function(host_address = "localhost")
 										receive_r_object(received_text_data,envir=user_envir)
 										assign(file_to_write,get0("file_to_write_object",envir=user_envir),envir=user_envir)
 										rm("file_to_write_object",envir=user_envir)
-										rm(list=c("current_line","data_length","data_length_int","file_exists_server","file_to_write","i","received_text_data"))
+										rm(list=c("total_size","file_to_write_size","envir_size","current_line","data_length","data_length_int","file_exists_server","file_to_write","i","received_text_data"))
 										save(list=ls(envir=user_envir),file=user_stored_data_address,envir=user_envir)
 									}
 								}
@@ -144,9 +162,13 @@ crypt_server <- function(host_address = "localhost")
 									receive_r_object(received_text_data,envir=user_envir)
 									assign(file_to_write,get0("file_to_write_object",envir=user_envir),envir=user_envir)
 									rm("file_to_write_object",envir=user_envir)
-									rm(list=c("current_line","data_length","data_length_int","file_exists_server","file_to_write","i","received_text_data"))
+									rm(list=c("total_size","file_to_write_size","envir_size","current_line","data_length","data_length_int","file_exists_server","file_to_write","i","received_text_data"))
 									save(list=ls(envir=user_envir),file=user_stored_data_address,envir=user_envir)
 								}
+							}
+							else if (nchar(file_to_write)>0 && total_size > user_data_limit)
+							{
+								exceed <- writeLines("0",con)
 							}
 						}
 #Deleting Data

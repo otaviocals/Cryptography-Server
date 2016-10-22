@@ -86,9 +86,52 @@ crypt_client <- function(host_address = "localhost")
 							file_to_read <- readLines(f, n=1)
 							write_read_file <- writeLines(file_to_read,con)
 							read_data <- readLines(con,1)
-							cat("\nData Object:\n\n",read_data,"\n")
-							rm(read_data)
-							rm(file_to_read)
+							if(read_data=="0")
+							{
+								cat("\nObject not Found.\n")
+								rm(read_data)
+								rm(file_to_read)
+							}
+							else if(read_data=="1")
+							{
+								data_length_string <- readLines(con,1)
+								data_length_int <- strtoi(data_length_string)
+								for(i in 1:data_length_int)
+								{
+									current_line <- readLines(con, 1)
+									if(exists("received_text_data"))
+									{
+										received_text_data <- c(received_text_data,current_line)
+									}
+									else
+									{
+										received_text_data <- current_line
+									}
+								}
+								receive_r_object(received_text_data)
+								
+								cat("\nLoad Object into Workspace? [y/n]\n")
+								load_to_work <- readLines(f, n=1)
+								if(tolower(load_to_work)=="y")
+								{
+									cat("\nFile loaded into Workspace.\nReading Data...\n\n")
+									assign(file_to_read,read_file,envir=.GlobalEnv)
+									print(read_file)
+								}
+								else if(tolower(load_to_work)=="n")
+								{
+									cat("\nReading Data...\n\n")
+									print(read_file)
+								}
+								else
+								{
+									cat("\nWrong Input. File not loaded into Workspace.\nReading Data...\n\n")
+									print(read_file)
+								}
+								rm("current_line","data_length_int","data_length_string","file_to_read","i","load_to_work","read_data","received_text_data","read_file")
+								
+							}
+
 						}
 #Writing Data
 						else if(action=="3")
@@ -99,21 +142,50 @@ crypt_client <- function(host_address = "localhost")
 							if(is.null(file_to_write_object))
 							{
 								cat("\nObject not found.\n")
+								write_read_file_size <- writeLines("0",con)
 								write_read_file <- writeLines("",con)
 
 							}
 							else
 							{
+								file_size <- toString(object.size(file_to_write_object))
+								write_read_file_size <- writeLines(file_size,con)
 								write_read_file <- writeLines(file_to_write,con)
-								exists_data <- readLines(con, n=1)
-								if(exists_data=="1")
+								exceed <- readLines(con, n=1)
+								if(exceed=="1")
 								{
-									cat("\nSame name file found on server. Overwrite? [y/n]\n")
-									overwrite <- readLines(f, n=1)
-									if(tolower(overwrite)=="y")
+									exists_data <- readLines(con, n=1)
+									if(exists_data=="1")
 									{
-										overwrite_response <- writeLines(tolower(overwrite),con)
-										cat("\nOverwriting File...\n")
+										cat("\nSame name file found on server. Overwrite? [y/n]\n")
+										overwrite <- readLines(f, n=1)
+										if(tolower(overwrite)=="y")
+										{
+											overwrite_response <- writeLines(tolower(overwrite),con)
+											cat("\nOverwriting File...\n")
+											write_object_text_data <- send_r_object(file_to_write_object)
+											data_length <- length(write_object_text_data)
+											data_length_string <- toString(data_length)
+											data_length_send <- writeLines(data_length_string,con)
+											for(i in 1:data_length)
+											{
+												current_line <- writeLines(write_object_text_data[i],con)
+											}
+										}
+										else if(tolower(overwrite)=="n")
+										{
+											overwrite_response <- writeLines(tolower(overwrite),con)
+											cat("\nFile not Overwritten.\n")
+										}
+										else
+										{
+											overwrite_response <- writeLines(tolower(overwrite),con)
+											cat("\nInocrrect input. File not Overwritten.\n")
+										}
+									}
+									else if(exists_data=="0")
+									{
+										cat("\nWriting File...\n")
 										write_object_text_data <- send_r_object(file_to_write_object)
 										data_length <- length(write_object_text_data)
 										data_length_string <- toString(data_length)
@@ -123,28 +195,10 @@ crypt_client <- function(host_address = "localhost")
 											current_line <- writeLines(write_object_text_data[i],con)
 										}
 									}
-									else if(tolower(overwrite)=="n")
-									{
-										overwrite_response <- writeLines(tolower(overwrite),con)
-										cat("\nFile not Overwritten.\n")
-									}
-									else
-									{
-										overwrite_response <- writeLines(tolower(overwrite),con)
-										cat("\nInocrrect input. File not Overwritten.\n")
-									}
 								}
-								else if(exists_data=="0")
+								else
 								{
-									cat("\nWriting File...\n")
-									write_object_text_data <- send_r_object(file_to_write_object)
-									data_length <- length(write_object_text_data)
-									data_length_string <- toString(data_length)
-									data_length_send <- writeLines(data_length_string,con)
-									for(i in 1:data_length)
-									{
-										current_line <- writeLines(write_object_text_data[i],con)
-									}
+									cat("\nFile Exceeds Data Limit\n")
 								}
 							}
 
@@ -162,6 +216,7 @@ crypt_client <- function(host_address = "localhost")
 #Logout
 						else if(action=="6")
 						{
+							cat("\nLogging Out...\n")
 							break
 						}
 #Invalid Action
