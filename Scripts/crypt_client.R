@@ -99,10 +99,53 @@ crypt_client <- function(host_address = "localhost")
 							if(is.null(file_to_write_object))
 							{
 								cat("\nObject not found.\n")
+								write_read_file <- writeLines("",con)
+
 							}
 							else
 							{
-								write_read_file <- writeLines(file_to_write_object,con)
+								write_read_file <- writeLines(file_to_write,con)
+								exists_data <- readLines(con, n=1)
+								if(exists_data=="1")
+								{
+									cat("\nSame name file found on server. Overwrite? [y/n]\n")
+									overwrite <- readLines(f, n=1)
+									if(tolower(overwrite)=="y")
+									{
+										overwrite_response <- writeLines(tolower(overwrite),con)
+										cat("\nOverwriting File...\n")
+										write_object_text_data <- send_r_object(file_to_write_object)
+										data_length <- length(write_object_text_data)
+										data_length_string <- toString(data_length)
+										data_length_send <- writeLines(data_length_string,con)
+										for(i in 1:data_length)
+										{
+											current_line <- writeLines(write_object_text_data[i],con)
+										}
+									}
+									else if(tolower(overwrite)=="n")
+									{
+										overwrite_response <- writeLines(tolower(overwrite),con)
+										cat("\nFile not Overwritten.\n")
+									}
+									else
+									{
+										overwrite_response <- writeLines(tolower(overwrite),con)
+										cat("\nInocrrect input. File not Overwritten.\n")
+									}
+								}
+								else if(exists_data=="0")
+								{
+									cat("\nWriting File...\n")
+									write_object_text_data <- send_r_object(file_to_write_object)
+									data_length <- length(write_object_text_data)
+									data_length_string <- toString(data_length)
+									data_length_send <- writeLines(data_length_string,con)
+									for(i in 1:data_length)
+									{
+										current_line <- writeLines(write_object_text_data[i],con)
+									}
+								}
 							}
 
 						}

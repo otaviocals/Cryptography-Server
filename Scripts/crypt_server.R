@@ -94,7 +94,60 @@ crypt_server <- function(host_address = "localhost")
 						{
 							writeLines("Writing Data...")
 							file_to_write <- readLines(con, 1)
-							print(file_to_write)
+							writeLines(file_to_write)
+							if(nchar(file_to_write)>0)
+							{
+								if(exists(file_to_write,envir=user_envir))
+								{
+									file_exists_server <- writeLines("1",con)
+									overwrite_response <- readLines(con, 1)
+									if(overwrite_response=="y")
+									{
+										data_length <- readLines(con, 1)
+										data_length_int <- strtoi(data_length)
+										for(i in 1:data_length_int)
+										{
+											current_line <- readLines(con, 1)
+											if(exists("received_text_data"))
+											{
+												received_text_data <- c(received_text_data,current_line)
+											}
+											else
+											{
+												received_text_data <- current_line
+											}
+										}
+										receive_r_object(received_text_data,envir=user_envir)
+										assign(file_to_write,get0("file_to_write_object",envir=user_envir),envir=user_envir)
+										rm("file_to_write_object",envir=user_envir)
+										rm(list=c("current_line","data_length","data_length_int","file_exists_server","file_to_write","i","received_text_data"))
+										save(list=ls(envir=user_envir),file=user_stored_data_address,envir=user_envir)
+									}
+								}
+								else
+								{
+									file_exists_server <- writeLines("0",con)
+									data_length <- readLines(con, 1)
+									data_length_int <- strtoi(data_length)
+									for(i in 1:data_length_int)
+									{
+										current_line <- readLines(con, 1)
+										if(exists("received_text_data"))
+										{
+											received_text_data <- c(received_text_data,current_line)
+										}
+										else
+										{
+											received_text_data <- current_line
+										}
+									}
+									receive_r_object(received_text_data,envir=user_envir)
+									assign(file_to_write,get0("file_to_write_object",envir=user_envir),envir=user_envir)
+									rm("file_to_write_object",envir=user_envir)
+									rm(list=c("current_line","data_length","data_length_int","file_exists_server","file_to_write","i","received_text_data"))
+									save(list=ls(envir=user_envir),file=user_stored_data_address,envir=user_envir)
+								}
+							}
 						}
 #Deleting Data
 						else if(action=="4")
