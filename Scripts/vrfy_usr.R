@@ -22,7 +22,7 @@ vrfy_usr <- function(input_data,database=user_data)
 					{
 						writeLines("Authenticated!")
 						auth <- TRUE
-						result <- 0
+						result <- i
 					}
 					
 				}
@@ -30,7 +30,7 @@ vrfy_usr <- function(input_data,database=user_data)
 				if(i==nrow(database) && usr_check==FALSE && usr_found==FALSE)
 				{
 					writeLines("No User Found")
-					result <- 1
+					result <- 0
 				}
 
 #Wrong Password End
@@ -38,7 +38,7 @@ vrfy_usr <- function(input_data,database=user_data)
 				if(i==nrow(database) && usr_check==FALSE && usr_found==TRUE)
 				{
 					writeLines("Wrong Password")
-					result <- 1
+					result <- 0
 				}
 #Succesful Auth End
 				if(auth)
@@ -52,7 +52,7 @@ vrfy_usr <- function(input_data,database=user_data)
 		else
 		{
 			writeLines("No Database")
-			result <- 1000
+			result <- -1000
 		}
 
 	result

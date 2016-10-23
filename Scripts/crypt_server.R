@@ -14,7 +14,7 @@ crypt_server <- function(host_address = "localhost")
 
 #Loading Data
 
-		user_data_table <- read.csv("Data/user_data.csv")
+		user_data_table <- read.csv("Data/user_data.csv",stringsAsFactors = FALSE)
 
 #Server
 
@@ -25,9 +25,22 @@ crypt_server <- function(host_address = "localhost")
 				data <- readLines(con, 1)
 				user_info_frame <- server_user_data_parser(data)
 				response <- toString(vrfy_usr(user_info_frame,database = user_data_table))
-				writeLines(response, con) 
+				if(strtoi(response)>0)
+				{
+					response_to_send <- "1"
+				}
+				else if(strtoi(response)==0)
+				{
+					response_to_send <- "0"
+				}
+				else
+				{
+					response_to_send <- "-1"
+				}
+				writeLines(response_to_send, con) 
+				rm(response_to_send)
 #Auth Successful
-				if(response==0)
+				if(response>0)
 				{
 #Load User Environment
 					user_name<-toString(user_info_frame[1,1])
@@ -46,6 +59,14 @@ crypt_server <- function(host_address = "localhost")
 						user_envir <- new.env()
 						load(user_stored_data_address,envir=user_envir)
 					}
+					previous_date <- user_data_table[response,4]
+					previous_os <- user_data_table[response,5]
+
+					user_data_table[response,4] <- format(date())
+					user_data_table[response,5] <- readLines(con, 1)
+
+
+					write.csv(user_data_table,file="Data/user_data.csv",row.names=FALSE)
 
 
 					while(TRUE)
@@ -102,7 +123,15 @@ crypt_server <- function(host_address = "localhost")
 #Writing Data
 						else if(action=="3")
 						{
-							envir_size <- object.size(get0(ls(envir=user_envir),envir=user_envir))
+
+							if(length(ls(envir=user_envir))>0)
+							{
+								envir_size <- object.size(get0(ls(envir=user_envir),envir=user_envir))
+							}
+							else
+							{
+								envir_size <- 0
+							}
 
 							writeLines("Writing Data...")
 							file_to_write_size <- readLines(con, 1)
@@ -175,11 +204,58 @@ crypt_server <- function(host_address = "localhost")
 						else if(action=="4")
 						{
 							writeLines("Deleting Data...")
+							file_to_delete <- readLines(con,1)
+							if(nchar(file_to_delete)>0)
+							{
+								read_file <- get0(file_to_delete,envir=user_envir)
+							}
+							else
+							{
+								read_file <- NULL
+							}
+							if(is.null(read_file))
+							{
+								writeLines("0",con)
+								writeLines("No data to delete.")
+							}
+							else
+							{
+								writeLines("1",con)
+								delete_confirm <- readLines(con,1)
+								if(delete_confirm=="1")
+								{
+									rm(list = file_to_delete,envir=user_envir)
+									save(list=ls(envir=user_envir),file=user_stored_data_address,envir=user_envir)
+									writeLines("File Deleted.")
+								}
+								else
+								{
+									writeLines("File not Deleted.")
+								}
+								rm(delete_confirm)
+							}
+							rm(file_to_delete)
+							rm(read_file)
 						}
 #Account Summary
 						else if(action=="5")
 						{
 							writeLines("Sending Summary...")
+
+							if(length(ls(envir=user_envir))>0)
+							{
+								envir_size <- object.size(get0(ls(envir=user_envir),envir=user_envir))
+							}
+							else
+							{
+								envir_size <- 0
+							}
+							writeLines(previous_date,con)
+							writeLines(previous_os,con)
+							writeLines(user_data_table[response,3],con)
+							writeLines(toString(envir_size),con)
+							writeLines(toString(user_data_limit),con)
+							rm(envir_size)
 						}
 #Logout
 						else if(action=="6")
@@ -195,6 +271,8 @@ crypt_server <- function(host_address = "localhost")
 							writeLines("Invalid Action.")
 						}
 					}
+					rm(previous_date)
+					rm(previous_os)
 				}
 
 				close(con)

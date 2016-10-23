@@ -10,7 +10,7 @@ crypt_client <- function(host_address = "localhost")
 
 #Loading Packages
 
-		packages_to_load <- c("sodium")
+		packages_to_load <- c("sodium","getPass")
 
 		for(i in 1:length(packages_to_load))
 		{
@@ -44,15 +44,15 @@ crypt_client <- function(host_address = "localhost")
 				if(tolower(user)=="q")
 				{
 					cat("\nExiting Server.\n\n")
-					close(con)
+					closeAllConnections()
 					break
 				}
-				cat("\nPassword:\n")
-				pass <- readLines(f, n=1)
+				pass <- getPass(msg="\nPassword:\n")
+
 				if(tolower(pass)=="q")
 				{
 					cat("\nExiting Server.\n\n")
-					close(con)
+					closeAllConnections()
 					break
 				}
 
@@ -61,11 +61,14 @@ crypt_client <- function(host_address = "localhost")
 
 
 				server_resp <- readLines(con, 1)
+
 #Auth Successful
-				if(server_resp == "0")
+				if(strtoi(server_resp) > 0)
 				{
 					cat("\nAuthenticated!\n\n")
 					
+					writeLines(toString(.Platform$OS.type), con)
+
 					while(TRUE)
 					{
 						cat("\nChoose an action:\n 1 - List Data          2 - Read Data          3 - Write Data\n 4 - Delete Data        5 - Account Summary    6 - Logout\n")
@@ -114,9 +117,33 @@ crypt_client <- function(host_address = "localhost")
 								load_to_work <- readLines(f, n=1)
 								if(tolower(load_to_work)=="y")
 								{
-									cat("\nFile loaded into Workspace.\nReading Data...\n\n")
-									assign(file_to_read,read_file,envir=.GlobalEnv)
-									print(read_file)
+									if(!exists(file_to_read,envir=.GlobalEnv))
+									{
+										cat("\nFile loaded into Workspace.\nReading Data...\n\n")
+										assign(file_to_read,read_file,envir=.GlobalEnv)
+										print(read_file)
+									}
+									else
+									{
+										cat("\nSame name file detected in Workspace. Overwrite it? [y/n]\n")
+										overwrite_local <- readLines(f, n=1)
+										if(tolower(overwrite_local)=="y")
+										{
+											cat("\nFile loaded into Workspace.\nReading Data...\n\n")
+											assign(file_to_read,read_file,envir=.GlobalEnv)
+											print(read_file)
+										}
+										else if(tolower(overwrite_local)=="n")
+										{
+											cat("\nFile not loaded into Workspace.\nReading Data...\n\n")
+											print(read_file)
+										}
+										else
+										{
+											cat("\nWrong Input. File not loaded into Workspace.\nReading Data...\n\n")
+											print(read_file)
+										}
+									}
 								}
 								else if(tolower(load_to_work)=="n")
 								{
@@ -206,12 +233,50 @@ crypt_client <- function(host_address = "localhost")
 #Deleting Data
 						else if(action=="4")
 						{
-							cat("\nData Deleted.\n")
+							cat("\nEnter Object Name.\n")
+							file_to_delete <- readLines(f, n=1)
+							delete_file <- writeLines(file_to_delete,con)
+							delete_data <- readLines(con,1)
+							if(delete_data=="0")
+							{
+								cat("\nData not Found.\n")
+							}
+							else
+							{
+								cat("\nConfirm Data Deletion? [y/n]\n")
+								delete_confirm <- readLines(f, n=1)
+								if(tolower(delete_confirm)=="y")
+								{
+									writeLines("1",con)
+									cat("\nData Deleted.\n")
+								}
+								else if(tolower(delete_confirm)=="n")
+								{
+									writeLines("0",con)
+									cat("\nData not Deleted.\n")
+								}
+								else
+								{
+									writeLines("0",con)
+									cat("\nInvalid Input. Data not Deleted.\n")
+								}
+								rm(delete_confirm)
+							}
+							rm(delete_data)
+							rm(file_to_delete)
+							
 						}
 #Account Summary
 						else if(action=="5")
 						{
+							previous_date <- readLines(con, 1)
+							previous_os <- readLines(con, 1)
+							init_date <- readLines(con, 1)
+							envir_size <- readLines(con, 1)
+							user_data_limit <- readLines(con, 1)
 							cat("\nAccount Summary:\n")
+							cat("\nTotal Memory Allocated: ",envir_size,"/",user_data_limit,"\nRegistration Date: ",init_date,"\nLast Login: ",previous_date,"\nLast OS: ",previous_os,"\n")
+							rm(list=c("previous_date","previous_os","init_date","envir_size","user_data_limit"))
 						}
 #Logout
 						else if(action=="6")
@@ -227,7 +292,7 @@ crypt_client <- function(host_address = "localhost")
 					}
 				}
 #Failure to Auth
-				else if(server_resp == "1")
+				else if(strtoi(server_resp) == 0)
 				{
 					cat("\nUser or Password is wrong.\n\n")
 					close(con)
