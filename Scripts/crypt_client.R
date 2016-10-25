@@ -67,7 +67,7 @@ crypt_client <- function(host_address = "localhost")
 				{
 					cat("\nAuthenticated!\n\n")
 					
-					writeLines(toString(.Platform$OS.type), con)
+					writeLines(toString(Sys.info()["sysname"]), con)
 
 					while(TRUE)
 					{
